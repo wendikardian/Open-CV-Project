@@ -16,7 +16,7 @@ body_cascade = cv2.CascadeClassifier(cv2.data.haarcascades+ "haarcascade_fullbod
 
 # Step 7. 
 # Define the variable for record the frame
-detection = True
+detection = False
 detection_stop_time = None
 timer_started = False
 SECONDS_TO_RECORD_AFTER_DETECTION = 5
@@ -52,6 +52,7 @@ while True:
             # Get the current time for the name of the video time
             current_time = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
             out = cv2.VideoWriter(f"{current_time}.mp4", fourcc, 20, frame_size) 
+            
             print("Started recording")
     elif detection: #if we not get faces or bodies but we still on detect previous time, we will still record it until that period of time
         if timer_started:
@@ -69,6 +70,8 @@ while True:
     # To record a video
     # Only if we detect something
     if detection:
+        current_time = datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+        cv2.putText(frame, current_time, (20, 20), cv2.FONT_HERSHEY_COMPLEX,1,(0,255,0), 1)
         out.write(frame)
 
     # Step 5
