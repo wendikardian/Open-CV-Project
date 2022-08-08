@@ -1,0 +1,1 @@
+tracker = cv2.TrackerCRST_create()
