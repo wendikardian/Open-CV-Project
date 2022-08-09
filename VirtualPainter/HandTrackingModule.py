@@ -1,27 +1,35 @@
+# ------------- NOTES -----------------
+# For the next step from 12 - end
+# we're going convert into class components, so we can use it for the next project where we want to use hand detector
+# Convert it into class component start from step 12
+
+
 # Step 1, initialization the file (import, webcam, etc)
 
 import cv2
 import mediapipe as mp
 import time
 
-cap = cv2.VideoCapture(0)
+# Step 12
+# Create a class, so we can make it for the next project
+class handDetector():
+    def __init__(self, mode = False, maxHands = 2, detectionConfidence = 0.5 , trackConfidence = 0.5):
+        self.mode = mode
+        self.maxHands = maxHands
+        self.detectionConfidence = detectionConfidence
+        self.trackConfidence = trackConfidence
 
-# Step 2. 
-# Define the tracker for hands that we are going to use for tracking a hand from mediapipe
-mpHands = mp.solutions.hands
-hands = mpHands.Hands()
 
-# Step 7
-mpDraw = mp.solutions.drawing_utils
+        # Step 13, copy the step from no 2 and 7 paste it on __init__ method
+        # Step 2. 
+        # Define the tracker for hands that we are going to use for tracking a hand from mediapipe
+        mpHands = mp.solutions.hands
+        hands = mpHands.Hands()
 
-# Step 9
-# Declare variable to calculate the FPS
-# Ptime means previous time and cTime means current time
-pTime = 0
-cTime = 0
+        # Step 7
+        mpDraw = mp.solutions.drawing_utils
 
-while True:
-    res, frame = cap.read()
+
 
     # Step 3
     # Because the frame is BGR color, we need to convert it to RGB color because hands on MP only can work for RGB color
@@ -74,18 +82,37 @@ while True:
     fps = 1/(cTime-pTime)
     pTime = cTime
 
-    # Step 11
+ 
+   
+
+
+
+
+def main():
+    cap = cv2.VideoCapture(0)
+
+    # Step 9
+    # Declare variable to calculate the FPS
+    # Ptime means previous time and cTime means current time
+    pTime = 0
+    cTime = 0
+
+    while True:
+        res, frame = cap.read()
+    
+       # Step 11
     # After find the FPS value we need to display it on the frame
     cv2.putText(frame, str(int(fps)), (10,70), cv2.FONT_HERSHEY_COMPLEX, 1, (0,255,0), 2)
 
     cv2.imshow("Frame", frame)
-
-   
-
-
+    
     key= cv2.waitKey(1)
     if key == ord('q'):
         break;
 
+
+
+
+if __main__ == "__main__"
 cap.release()
 cv2.destroyAllWindows()
