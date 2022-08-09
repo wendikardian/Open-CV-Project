@@ -14,9 +14,10 @@ import time
 # Create a class, so we can make it for the next project
 class handDetector():
     # Step 13 -> declare the method for initialization the class
-    def __init__(self, mode = False, maxHands = 2, detectionConfidence = 0.5 , trackConfidence = 0.5):
+    def __init__(self, mode=False,maxHands=2, modelComplexity=1, detectionConfidence = 0.5 , trackConfidence = 0.5):
         self.mode = mode
         self.maxHands = maxHands
+        self.modelComplexity = modelComplexity
         self.detectionConfidence = detectionConfidence
         self.trackConfidence = trackConfidence
 
@@ -25,8 +26,8 @@ class handDetector():
         # Step 2. 
         # Define the tracker for hands that we are going to use for tracking a hand from mediapipe
         self.mpHands = mp.solutions.hands #add self first -> so it means that we're going to declare it as global property
-        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.detectionConfidence, self.trackConfidence) #Add the parameter
-        self.hands = self.mpHands.Hands() #Add the parameter
+        self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.modelComplexity, self.detectionConfidence, self.trackConfidence) #Add the parameter
+        # self.hands = self.mpHands.Hands() #Add the parameter
 
         # Step 7
         self.mpDraw = mp.solutions.drawing_utils
@@ -43,7 +44,7 @@ class handDetector():
         # After we convert it into RGB color, we need to process it using the hands variable that already created before
 
         # Step 15. Dont forget to add self before -> it means we're access the global property here
-        results = self.hands.process(frameRGB) 
+        self.results = self.hands.process(frameRGB)  # Dont forget to add self
 
         # Step 5
         # Try to print the results, to find out what is inside the results
@@ -54,29 +55,11 @@ class handDetector():
 
         # Step 6
         # If there is a hand detected on the camera
-        if results.multi_hand_landmarks:
+        if self.results.multi_hand_landmarks:
             # We will loop it, because maybe there is much more than 1 hand on the camera
-            for handLms in results.multi_hand_landmarks:
+            for handLms in self.results.multi_hand_landmarks:
 
 
-                # Step 17. Try to comment it because we dont want it to draw it
-                # # Step 12
-                # # After to find landmark on the frame, next we need to figure out the id of the landmark
-                # for id, lm in enumerate(handLms.landmark):
-                #     # Try to print it, this is the example of the what is the value of id and lm
-                #     # 20 x: 0.5787419676780701 -> 20 is id
-                #     # y: 0.9594467282295227
-                #     # z: -0.01320577971637249
-                #     # print(id, lm)
-                #     h, w, c = frame.shape #try to get height, width, channel
-                #     cx, cy = int(lm.x*w), int(lm.y*h)
-                #     # Try to print it
-                #     # If we print it, it will the display the id of every landmark to every coordinates on the frame 
-                #     print(id, cx, cy)
-
-                #     # id == 0 is one of the node landmark on the hand
-                #     if id == 0:
-                #         cv2.circle(frame, (cx,cy), 20, (255,0,0), cv2.FILLED)
 
                 # Step 6
                 # After we define the mpDraw to draw the solutions, use it to draw it
@@ -94,8 +77,46 @@ class handDetector():
         # Dont forget to return the frame
         return frame
 
+    # Step 21
+    # Create new method called findPosition
+    def findPosition(self, frame, handNo=0, draw=True):
         
+        # Step 22
+        # Create a list that will contain the landmark position
+        lmList = []
 
+        # Step 22
+        # Add Condition
+
+        if self.results.multi_hand_landmarks:
+            # Detect the number by create new variable called myHand 
+            myHand = self.results.multi_hand_landmarks[handNo]
+
+
+            # Step 17. Try to comment it because we dont want it to draw it
+            # Step 12
+            # After to find landmark on the frame, next we need to figure out the id of the landmark
+            for id, lm in enumerate(myHand.landmark): #update it to myHand
+                # Try to print it, this is the example of the  what is the value of id and lm
+                # 20 x: 0.5787419676780701 -> 20 is id
+                # y: 0.9594467282295227
+                # z: -0.01320577971637249
+                # print(id, lm)
+                h, w, c = frame.shape #try to get height, width, channel
+                cx, cy = int(lm.x*w), int(lm.y*h)
+                # Try to print it
+                # If we print it, it will the display the id of every landmark to every coordinates on the frame 
+                # print(id, cx, cy)
+
+                # Add to the list
+                lmList.append([id, cx, cy])
+
+                # id == 0 is one of the node landmark on the hand
+                # if id == 0:
+                if draw:
+                    cv2.circle(frame, (cx,cy), 7, (255,0,0), cv2.FILLED)
+        
+        return lmList
  
    
 
@@ -123,6 +144,13 @@ def main():
 
         # Step 20, after we get the frame, send the frame to method findHands that we already using it
         frame = detector.findHands(frame)
+
+
+        # Step 23
+        # Called the method findPosition and then store it at the list
+        lmList = detector.findPosition(frame, draw= False) #You also can add another parameter while called the method
+        if len(lmList) != 0:
+            print(lmList[0]) # 0 means is the landmark position, there is 20 landmark id
 
         # Step 10
         # Calculate the time for display the FPS
