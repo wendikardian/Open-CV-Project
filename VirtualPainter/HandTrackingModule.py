@@ -83,7 +83,7 @@ class handDetector():
         
         # Step 22
         # Create a list that will contain the landmark position
-        lmList = []
+        self.lmList = []
 
         # Step 22
         # Add Condition
@@ -109,14 +109,37 @@ class handDetector():
                 # print(id, cx, cy)
 
                 # Add to the list
-                lmList.append([id, cx, cy])
+                self.lmList.append([id, cx, cy])
 
                 # id == 0 is one of the node landmark on the hand
                 # if id == 0:
                 if draw:
                     cv2.circle(frame, (cx,cy), 7, (255,0,0), cv2.FILLED)
         
-        return lmList
+        return self.lmList
+    
+    def fingersUp(self):
+        # Declare a list called fingers
+        fingers = []
+        # List tips id berisikan landmark ujung setiap jari
+        tipIds = [4,8,12,16,20]
+
+        # Conditional for thumb
+        if self.lmList[tipIds[0]][1] < self.lmList[tipIds[0] -1][1]:
+            fingers.append(1)
+        else:
+            fingers.append(0)
+
+        
+        # Condition for 4 Fingers
+        for id in range(1,5):
+            if self.lmList[tipIds[id]][2] < self.lmList[tipIds[id] -2] [2]:
+                fingers.append(1)
+            else:
+                fingers.append(0)
+
+        return fingers
+        
  
    
 
@@ -149,8 +172,8 @@ def main():
         # Step 23
         # Called the method findPosition and then store it at the list
         lmList = detector.findPosition(frame, draw= False) #You also can add another parameter while called the method
-        if len(lmList) != 0:
-            print(lmList[0]) # 0 means is the landmark position, there is 20 landmark id
+        # if len(lmList) != 0:
+        #     print(lmList[0]) # 0 means is the landmark position, there is 20 landmark id
 
         # Step 10
         # Calculate the time for display the FPS
