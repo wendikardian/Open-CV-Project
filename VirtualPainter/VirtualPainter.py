@@ -32,6 +32,7 @@ header = overlayList[0]
 drawColor = (0,0,255)
 
 brushThickness = 7
+eraserThickness = 40
 xp, yp = 0,0 
 
 # Step 14
@@ -61,6 +62,7 @@ while True:
     lmList = detector.findPosition(frame, draw=False)
     
     if len(lmList) != 0:
+        
         # print(lmList)
 
         # Tip of the index and middle finger
@@ -77,6 +79,9 @@ while True:
         # Step 9
         # If selection mode (2 finger ups)
         if fingers[1] and fingers[2]:
+            # Step 17,
+            # add this code, so whatever hand is on selection mode, reset it to zero again
+            xp, yp = 0,0 
             print("Selection mode")
             # If on selection mode there is rectangle on the finger
             cv2.rectangle(frame, (x1,y1-25), (x2, y2+25), drawColor, cv2.FILLED)
@@ -115,17 +120,38 @@ while True:
             if xp == 0 and yp == 0:
                 xp, yp = x1, y1
 
-            cv2.line(frame, (xp, yp), (x1,y1), drawColor, brushThickness)
-            cv2.line(imgCanvas, (xp, yp), (x1,y1), drawColor, brushThickness)
+            # Special condition if they choose to erase
+            if drawColor == (0,0,0):
+                cv2.line(frame, (xp, yp), (x1,y1), drawColor, eraserThickness)
+                cv2.line(imgCanvas, (xp, yp), (x1,y1), drawColor, eraserThickness)
+            else:
+                cv2.line(frame, (xp, yp), (x1,y1), drawColor, brushThickness)
+                cv2.line(imgCanvas, (xp, yp), (x1,y1), drawColor, brushThickness)
             xp, yp = x1, y1 #keep updating if the finger move, so the previous will contain the last coordinates
 
             # As you can see if you just add this code, it will just draw and the remove it as soon as possible, 
             # We will keep it forever, unless it's deleted using eraser
 
+    # Step 16
+    # try to combine 2 frame without using addWeighted
+    # Using threshold and masking technique
+    # change the frame into gray scale first
+    frameGray = cv2.cvtColor(imgCanvas, cv2.COLOR_BGR2GRAY)
+    # Create inverst threshold
+    _, frameInvers = cv2.threshold(frameGray, 50, 255, cv2.THRESH_BINARY_INV)
+    frameInvers = cv2.cvtColor(frameInvers, cv2.COLOR_GRAY2BGR)
+    frame = cv2.bitwise_and(frame, frameInvers)
+    frame = cv2.bitwise_or(frame, imgCanvas)
+
     #Step 5
     # Overlapping the frame with the header to draw the line
     # Setting the header image
     frame[0: 125, 0:1280] = header
+
+    # Step 15
+    # Combine frame with canvas
+    # 0.5 means every layout have 50%
+    # frame = cv2.addWeighted(frame, 0.5, imgCanvas, 0.5, 0)
 
     cv2.imshow("Frame", frame)
 
